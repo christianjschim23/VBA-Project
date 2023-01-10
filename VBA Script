@@ -1,0 +1,132 @@
+Sub StockMarket():
+
+' Loop through all sheets
+Dim ws As Worksheet
+
+For Each ws In Worksheets
+
+Dim i, j, LastRow1, LastRow2, Summary_Table_Row As Long
+Dim ClosePrice, OpenPrice As Double
+Dim YearlyChange, PercentChange, TotalVolume, GreatInc, GreatDec, GreatVol As Double
+Dim Ticker_Symbol As String
+
+LastRow1 = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+Summary_Table_Row = 2
+j = 2
+
+For i = 2 To LastRow1
+      
+      If ws.Cells(i + 1, 1).Value = ws.Cells(i, 1).Value Then
+       ' Add the Total Stock Volume
+        TotalVolume = TotalVolume + ws.Cells(i, 7).Value
+        ws.Range("N" & Summary_Table_Row).Value = TotalVolume
+     
+     
+     End If
+    ' Check if we are still within the same stock ticker, if it is not
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+    
+        ' Set the Ticker name
+        Ticker_Symbol = ws.Cells(i, 1).Value
+        
+        ' Print the Ticker Symbol in the Summary Table
+        ws.Range("K" & Summary_Table_Row).Value = Ticker_Symbol
+               
+        'Calculate the yearly change
+        ClosePrice = ws.Cells(i, 6).Value
+        OpenPrice = ws.Cells(j, 3).Value
+        
+        YearlyChange = ClosePrice - OpenPrice
+        
+        'Print the Yearly Change in the Summary Table Row
+        ws.Range("L" & Summary_Table_Row).Value = YearlyChange
+        
+        'Color Yearly Change red if negative; green if positive
+        If YearlyChange > 0 Then
+             ws.Cells(Summary_Table_Row, 12).Interior.ColorIndex = 4
+        Else
+            ws.Cells(Summary_Table_Row, 12).Interior.ColorIndex = 3
+        
+        End If
+        
+        ' Calculate Percent Change
+        If ws.Cells(j, 3).Value <> 0 Then
+        
+        PercentChange = (ClosePrice - OpenPrice) / OpenPrice
+
+        ' Print the Percent Change in the Summary Table Row
+        ws.Range("M" & Summary_Table_Row).Value = PercentChange
+        ws.Range("M" & Summary_Table_Row).NumberFormat = "0.00%"
+        
+        End If
+        
+       ' Add the Total Stock Volume
+        TotalVolume = TotalVolume + Cells(i, 7).Value
+        ws.Range("N" & Summary_Table_Row).Value = TotalVolume
+        ' Add one to the summary table row
+        Summary_Table_Row = Summary_Table_Row + 1
+        TotalVolume = 0
+        
+        j = i + 1
+        
+        End If
+        
+    Next i
+    
+    LastRow2 = ws.Cells(ws.Rows.Count, 11).End(xlUp).Row
+    
+    For i = 2 To LastRow2
+    ' Find the greatest increase of the percent change
+    If ws.Cells(i, 13).Value > GreatInc Then
+    GreatInc = ws.Cells(i, 13).Value
+    
+    ws.Cells(2, 19).Value = GreatInc
+    ws.Cells(2, 19).NumberFormat = "0.00%"
+    ws.Cells(2, 18).Value = ws.Cells(i, 11).Value
+    
+    Else
+    
+    GreatInc = GreatInc
+    
+    End If
+    ' Find the greatest decrease of percent change
+    If ws.Cells(i, 13).Value < GreatDec Then
+    GreatDec = ws.Cells(i, 13).Value
+    
+    ws.Cells(3, 19).Value = GreatDec
+    ws.Cells(3, 19).NumberFormat = "0.00%"
+    ws.Cells(3, 18).Value = ws.Cells(i, 11).Value
+    
+    Else
+    
+    GreatDec = GreatDec
+    
+    End If
+    ' Find the ticker with the highest volume
+    If ws.Cells(i, 14).Value > GreatVol Then
+    GreatVol = ws.Cells(i, 14).Value
+    
+    ws.Cells(4, 19).Value = GreatVol
+    ws.Cells(4, 18).Value = ws.Cells(i, 11).Value
+    
+    Else
+    
+    GreatVol = GreatVol
+    
+    End If
+    
+    Next i
+    
+    ' Label summary headers
+    ws.Cells(1, 12).Value = "Yearly Change"
+    ws.Cells(1, 13).Value = "Percent Change"
+    ws.Cells(1, 14).Value = "Total Stock Volume"
+    ws.Cells(1, 18).Value = "Ticker"
+    ws.Cells(1, 19).Value = "Value"
+    ws.Cells(2, 17).Value = "Greatest % Increase"
+    ws.Cells(3, 17).Value = "Greatest % Decrease"
+    ws.Cells(4, 17).Value = "Greatest Total Volume"
+  
+Next ws
+
+End Sub
